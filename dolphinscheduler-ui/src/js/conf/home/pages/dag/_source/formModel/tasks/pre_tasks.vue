@@ -16,34 +16,33 @@
  */
 <template>
   <div class="pre_tasks-model">
-    <div class="clearfix list">
-      <div class="text-box">
-        <span>{{$t('Pre tasks')}}</span>
+    <m-list-box>
+      <div slot="text">{{$t('Pre tasks')}}</div>
+      <div slot="content">
+        <el-select
+            ref="preTasksSelector"
+            style="width: 100%;"
+            filterable
+            multiple
+            size="small"
+            v-model="preTasks"
+            :disabled="isDetails"
+            :id="preTasksSelectorId">
+          <el-option
+              v-for="task in preTaskList"
+              :key="task.id"
+              :value="task.id"
+              :label="task.name">
+          </el-option>
+        </el-select>
       </div>
-      <div class="cont-box">
-        <div class="label-box">
-          <x-select
-              ref="preTasksSelector"
-              style="width: 100%;"
-              filterable
-              multiple
-              v-model="preTasks"
-              :disabled="isDetails"
-              :id="preTasksSelectorId">
-            <x-option
-                v-for="task in preTaskList"
-                :key="task.id"
-                :value="task.id"
-                :label="task.name">
-            </x-option>
-          </x-select>
-        </div>
-      </div>
-    </div>
+    </m-list-box>
   </div>
 </template>
 <script>
   import disabledState from '@/module/mixin/disabledState'
+  import mListBox from './_source/listBox'
+
   export default {
     name: 'pre_tasks',
     mixins: [disabledState],
@@ -52,15 +51,15 @@
     },
     data () {
       return {
-        preTasksSelectorId: '_preTasksSelectorId',  // Refresh target vue-component by changing id
+        preTasksSelectorId: '_preTasksSelectorId', // Refresh target vue-component by changing id
         preTasks: [],
-        preTasksOld: [],
+        preTasksOld: []
       }
     },
     mounted () {
-      this.preTasks = this.backfillItem['preTasks'] || this.preTasks
+      this.preTasks = this.backfillItem.preTasks || this.preTasks
       this.preTasksOld = this.preTasks
-    
+
       // Refresh target vue-component by changing id
       this.$nextTick(() => {
         this.preTasksSelectorId = 'preTasksSelectorId'
@@ -68,7 +67,7 @@
     },
     computed: {
       preTaskList: function () {
-        let currentTaskId = this.backfillItem['id'] || this.id
+        let currentTaskId = this.backfillItem.id || this.id
         let cacheTasks = Object.assign({}, this.store.state.dag.tasks)
         let keys = Object.keys(cacheTasks)
         for (let i = 0; i < keys.length; i++) {
@@ -91,7 +90,7 @@
       // preTaskIds used to delete connection
       preTasksToDelete: function () {
         return this.preTasksOld.filter(taskId => this.preTasks.indexOf(taskId) === -1)
-      },
+      }
     },
     methods: {
       // Pass data to parent-level to process dag
@@ -99,10 +98,11 @@
         this.$emit('on-pre-tasks', {
           preTasks: this.preTasks,
           preTasksToAdd: this.preTasksToAdd,
-          preTasksToDelete: this.preTasksToDelete,
+          preTasksToDelete: this.preTasksToDelete
         })
         return true
       }
-    }
+    },
+    components: { mListBox }
   }
 </script>
